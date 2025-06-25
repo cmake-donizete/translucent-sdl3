@@ -22,6 +22,11 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
         return SDL_APP_FAILURE;
     }
 
+    if (!SDL_SetWindowOpacity(window, 0.5f)) {
+        SDL_Log("Couldn't set window opacity: %s", SDL_GetError());
+        return SDL_APP_FAILURE;
+    }
+
     return SDL_APP_CONTINUE;  /* carry on with the program! */
 }
 
