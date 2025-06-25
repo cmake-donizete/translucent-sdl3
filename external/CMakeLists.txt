@@ -1,0 +1,1 @@
+subdirs(SDL SDL_image)
