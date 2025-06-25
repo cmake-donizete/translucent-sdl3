@@ -7,8 +7,10 @@
 static SDL_Window *window = NULL;
 static SDL_Renderer *renderer = NULL;
 static SDL_Texture *texture = NULL;
-static SDL_FRect texture_rect;
+
+static SDL_FRect f_rect;
 static SDL_Point mouse_movement;
+
 static bool is_dragging = false;
 
 SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
@@ -52,8 +54,8 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
     }
     SDL_DestroySurface(surface);
 
-    texture_rect.w = texture->w;
-    texture_rect.h = texture->h;
+    f_rect.w = texture->w;
+    f_rect.h = texture->h;
 
     return SDL_APP_CONTINUE;
 }
@@ -77,16 +79,19 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event)
 
     if (event->type == SDL_EVENT_MOUSE_WHEEL)
     {
-        float width = texture_rect.w;
-        float height = texture_rect.h;
-
         float scale = (event->wheel.y > .0f) ? +.1f : -.1f;
 
-        texture_rect.w += width * scale;
-        texture_rect.h += height * scale;
+        float horizontal_percentage = mouse_movement.x / (float)texture->w;
+        float vertical_percentage = mouse_movement.y / (float)texture->h;
 
-        texture_rect.x -= (texture_rect.w - width) / 2.0f;
-        texture_rect.y -= (texture_rect.h - height) / 2.0f;
+        float width = f_rect.w;
+        float height = f_rect.h;
+
+        f_rect.w += width * scale;
+        f_rect.h += height * scale;
+
+        f_rect.x -= (f_rect.w - width) / (1.0f / horizontal_percentage);
+        f_rect.y -= (f_rect.h - height) / (1.0f / vertical_percentage);
     }
 
     if (event->type == SDL_EVENT_MOUSE_BUTTON_DOWN && !is_dragging)
@@ -101,8 +106,8 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event)
     {
         if (is_dragging)
         {
-            texture_rect.x += event->motion.x - mouse_movement.x;
-            texture_rect.y += event->motion.y - mouse_movement.y;
+            f_rect.x += event->motion.x - mouse_movement.x;
+            f_rect.y += event->motion.y - mouse_movement.y;
         }
 
         mouse_movement.x = event->motion.x;
@@ -120,7 +125,7 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event)
 SDL_AppResult SDL_AppIterate(void *appstate)
 {
     SDL_RenderClear(renderer);
-    SDL_RenderTexture(renderer, texture, NULL, &texture_rect);
+    SDL_RenderTexture(renderer, texture, NULL, &f_rect);
     SDL_RenderPresent(renderer);
 
     return SDL_APP_CONTINUE;
