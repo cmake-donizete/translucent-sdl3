@@ -97,10 +97,13 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event)
         is_dragging = true;
     }
 
-    if (event->type == SDL_EVENT_MOUSE_MOTION && is_dragging)
+    if (event->type == SDL_EVENT_MOUSE_MOTION)
     {
-        texture_rect.x += event->motion.x - mouse_movement.x;
-        texture_rect.y += event->motion.y - mouse_movement.y;
+        if (is_dragging)
+        {
+            texture_rect.x += event->motion.x - mouse_movement.x;
+            texture_rect.y += event->motion.y - mouse_movement.y;
+        }
 
         mouse_movement.x = event->motion.x;
         mouse_movement.y = event->motion.y;
