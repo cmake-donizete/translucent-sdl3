@@ -75,6 +75,20 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event)
         }
     }
 
+    if (event->type == SDL_EVENT_MOUSE_WHEEL)
+    {
+        float width = texture_rect.w;
+        float height = texture_rect.h;
+
+        float scale = (event->wheel.y > .0f) ? +.1f : -.1f;
+
+        texture_rect.w += width * scale;
+        texture_rect.h += height * scale;
+
+        texture_rect.x -= (texture_rect.w - width) / 2.0f;
+        texture_rect.y -= (texture_rect.h - height) / 2.0f;
+    }
+
     if (event->type == SDL_EVENT_MOUSE_BUTTON_DOWN && !is_dragging)
     {
         mouse_movement.x = event->motion.x;
