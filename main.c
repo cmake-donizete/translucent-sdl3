@@ -65,11 +65,14 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event)
         return SDL_APP_SUCCESS;
     }
 
-    if (event->type == SDL_EVENT_MOUSE_WHEEL)
+    if (event->type == SDL_EVENT_KEY_DOWN)
     {
-        float alpha = SDL_GetWindowOpacity(window);
-        alpha += (event->wheel.y > .0f) ? +.1f : -.1f;
-        SDL_SetWindowOpacity(window, alpha);
+        SDL_Scancode scancode = event->key.scancode;
+        if (scancode >= SDL_SCANCODE_1 && scancode <= SDL_SCANCODE_0)
+        {
+            float alpha = (scancode - SDL_SCANCODE_1) / 10.0f;
+            SDL_SetWindowOpacity(window, alpha);
+        }
     }
 
     if (event->type == SDL_EVENT_MOUSE_BUTTON_DOWN && !is_dragging)
