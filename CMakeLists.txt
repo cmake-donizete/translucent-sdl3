@@ -5,5 +5,7 @@ add_subdirectory(external)
 
 add_executable(translucent main.c)
 
+target_include_directories(translucent PUBLIC include/)
+
 target_link_libraries(translucent SDL3_image::SDL3_image SDL3::SDL3)
 
