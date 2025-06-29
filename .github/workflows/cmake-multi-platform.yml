@@ -9,12 +9,6 @@ jobs:
     runs-on: self-hosted
 
     steps:
-    - name: Set up MinGW
-      uses: egor-tensin/setup-mingw@v2.2.0
-      with:
-        platform: x64
-        static: 0
-
     - name: Checkout repository
       uses: actions/checkout@v4
       with:
@@ -26,13 +20,54 @@ jobs:
       run: |
         echo "build-output-dir=${{ github.workspace }}/windows" >> "$GITHUB_OUTPUT"
         echo "build-output-file=${{ github.workspace }}/windows/translucent.exe" >> "$GITHUB_OUTPUT"
-        echo "cmake-toolchain=${{ github.workspace }}/toolchain-mingw32.cmake" >> "$GITHUB_OUTPUT"
+        echo "cmake-toolchain=${{ github.workspace }}/toolchain-mingw64.cmake" >> "$GITHUB_OUTPUT"
 
     - name: Configure CMake
       run: >
         cmake
         -B ${{ steps.strings.outputs.build-output-dir }}
         -DCMAKE_TOOLCHAIN_FILE=${{ steps.strings.outputs.cmake-toolchain }}
+        -DCMAKE_BUILD_TYPE=Release
+        -S ${{ github.workspace }}
+
+    - name: Build
+      run: cmake --build ${{ steps.strings.outputs.build-output-dir }} --config Release
+
+    - name: Upload
+      uses: actions/upload-artifact@v4
+      with:
+        path: ${{ steps.strings.outputs.build-output-file }}
+
+    - name: Release
+      uses: softprops/action-gh-release@v2
+      with:
+        token: ${{ secrets.GT }}
+        tag_name: nightly
+        files: ${{ steps.strings.outputs.build-output-file }}
+
+  linux:
+    runs-on: self-hosted
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        submodules: 'true'
+
+    - name: Set reusable strings
+      id: strings
+      shell: bash
+      run: |
+        echo "build-output-dir=${{ github.workspace }}/linux" >> "$GITHUB_OUTPUT"
+        echo "build-output-file=${{ github.workspace }}/linux/translucent" >> "$GITHUB_OUTPUT"
+        echo "cmake-toolchain=${{ github.workspace }}/toolchain-x86_64-linux.cmake" >> "$GITHUB_OUTPUT"
+
+    - name: Configure CMake
+      run: >
+        cmake
+        -B ${{ steps.strings.outputs.build-output-dir }}
+        -DCMAKE_TOOLCHAIN_FILE=${{ steps.strings.outputs.cmake-toolchain }}
+        -DSDL_UNIX_CONSOLE_BUILD=ON
         -DCMAKE_BUILD_TYPE=Release
         -S ${{ github.workspace }}
 
