@@ -68,7 +68,6 @@ jobs:
         cmake
         -B ${{ steps.strings.outputs.build-output-dir }}
         -DCMAKE_TOOLCHAIN_FILE=${{ steps.strings.outputs.cmake-toolchain }}
-        -DSDL_UNIX_CONSOLE_BUILD=ON
         -DCMAKE_BUILD_TYPE=Release
         -S ${{ github.workspace }}
 

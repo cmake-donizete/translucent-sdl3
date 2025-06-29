@@ -5,7 +5,7 @@ set(CMAKE_C_COMPILER x86_64-linux-gnu-gcc)
 set(CMAKE_CXX_COMPILER x86_64-linux-gnu-g++)
 set(CMAKE_RC_COMPILER x86_64-linux-gnu-windres)
 
-set(CMAKE_FIND_ROOT_PATH /usr/x86_64-linux-gnu)
+set(CMAKE_FIND_ROOT_PATH /usr/lib/x86_64-linux-gnu /usr/x86_64-linux-gnu/lib)
 
 set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
 set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
