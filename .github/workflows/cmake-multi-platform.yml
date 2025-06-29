@@ -36,6 +36,7 @@ jobs:
     - name: Upload
       uses: actions/upload-artifact@v4
       with:
+        name: windows
         path: ${{ steps.strings.outputs.build-output-file }}
 
     - name: Release
@@ -77,6 +78,7 @@ jobs:
     - name: Upload
       uses: actions/upload-artifact@v4
       with:
+        name: linux
         path: ${{ steps.strings.outputs.build-output-file }}
 
     - name: Release
