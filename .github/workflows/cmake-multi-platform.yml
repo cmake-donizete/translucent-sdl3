@@ -14,7 +14,8 @@ jobs:
       with:
         platform: x64
 
-    - uses: actions/checkout@v4
+    - name: Checkout repository
+      uses: actions/checkout@v4
       with:
         submodules: 'true'
 
@@ -23,12 +24,14 @@ jobs:
       shell: bash
       run: |
         echo "build-output-dir=${{ github.workspace }}/windows" >> "$GITHUB_OUTPUT"
+        echo "build-output-file=${{ github.workspace }}/windows/translucent.exe" >> "$GITHUB_OUTPUT"
+        echo "cmake-toolchain=${{ github.workspace }}/toolchain-mingw32.cmake" >> "$GITHUB_OUTPUT"
 
     - name: Configure CMake
       run: >
         cmake
         -B ${{ steps.strings.outputs.build-output-dir }}
-        -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/toolchain-mingw32.cmake
+        -DCMAKE_TOOLCHAIN_FILE=${{ steps.strings.outputs.cmake-toolchain }}
         -DCMAKE_BUILD_TYPE=Release
         -S ${{ github.workspace }}
 
@@ -38,4 +41,11 @@ jobs:
     - name: Upload
       uses: actions/upload-artifact@v4
       with:
-        path: ${{ steps.strings.outputs.build-output-dir }}/translucent.exe
+        path: ${{ steps.strings.outputs.build-output-file }}
+
+    - name: Release
+      uses: softprops/action-gh-release@v2
+      with:
+        token: ${{ secrets.GT }}
+        tag_name: nightly
+        files: ${{ steps.strings.outputs.build-output-file }}
