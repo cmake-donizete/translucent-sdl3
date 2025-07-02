@@ -5,7 +5,7 @@ set(CMAKE_C_COMPILER x86_64-linux-gnu-gcc)
 set(CMAKE_CXX_COMPILER x86_64-linux-gnu-g++)
 set(CMAKE_RC_COMPILER x86_64-linux-gnu-windres)
 
-set(CMAKE_SYSROOT ~/sysroots/amd64)
+set(CMAKE_SYSROOT $ENV{HOME}/sysroots/amd64)
 
 set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
 set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
