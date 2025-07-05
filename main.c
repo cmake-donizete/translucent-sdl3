@@ -116,23 +116,28 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event)
             float alpha = (scancode - SDL_SCANCODE_1) / 10.0f;
             SDL_SetWindowOpacity(window, alpha);
         }
+
+        if (scancode == SDL_SCANCODE_R)
+        {
+            state.scale = 1.0f;
+            state.f_rect = (SDL_FRect){
+                .x = 0,
+                .y = 0,
+                .w = texture->w * args.image_scale,
+                .h = texture->h * args.image_scale,
+            };
+            SDL_SetWindowSize(window,
+                              texture->w * args.window_scale,
+                              texture->h * args.window_scale);
+        }
     }
 
     if (event->type == SDL_EVENT_MOUSE_WHEEL)
     {
-        float scale = (event->wheel.y > .0f) ? +.1f : -.1f;
+        state.scale += (event->wheel.y > .0f) ? +.1f : -.1f;
 
-        float horizontal_percentage = mouse_movement->x / (float)texture->w;
-        float vertical_percentage = mouse_movement->y / (float)texture->h;
-
-        float width = f_rect->w;
-        float height = f_rect->h;
-
-        f_rect->w += width * scale;
-        f_rect->h += height * scale;
-
-        f_rect->x -= (f_rect->w - width) / (1.0f / horizontal_percentage);
-        f_rect->y -= (f_rect->h - height) / (1.0f / vertical_percentage);
+        f_rect->w = texture->w * state.scale * args.image_scale;
+        f_rect->h = texture->h * state.scale * args.image_scale;
     }
 
     if (event->type == SDL_EVENT_MOUSE_BUTTON_DOWN && !state.is_dragging)

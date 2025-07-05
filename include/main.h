@@ -20,6 +20,7 @@ struct state
     SDL_Point mouse_movement;
 
     bool is_dragging;
+    float scale;
 };
 
 static struct args args = {
@@ -27,4 +28,6 @@ static struct args args = {
     .image_scale = 1.0f,
 };
 
-static struct state state;
+static struct state state = {
+    .scale = 1.0f
+};
