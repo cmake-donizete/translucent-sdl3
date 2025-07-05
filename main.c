@@ -130,6 +130,11 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event)
                               texture->w * args.window_scale,
                               texture->h * args.window_scale);
         }
+
+        if (scancode == SDL_SCANCODE_ESCAPE)
+        {
+            return SDL_APP_SUCCESS;
+        }
     }
 
     if (event->type == SDL_EVENT_MOUSE_WHEEL)
