@@ -11,11 +11,11 @@ static void parse_args(int argc, char *argv[])
     struct option long_options[] = {
         {"window_scale", required_argument, 0, 'w'},
         {"image_scale", required_argument, 0, 'i'},
-        {"path", required_argument, 0, 'p'},
+        {"filename", required_argument, 0, 'f'},
         {0, 0, 0, 0},
     };
 
-    while ((opt = getopt_long(argc, argv, "w:i:p:", long_options, &index)) != -1)
+    while ((opt = getopt_long(argc, argv, "w:i:f:", long_options, &index)) != -1)
     {
         switch (opt)
         {
@@ -31,9 +31,9 @@ static void parse_args(int argc, char *argv[])
             break;
         }
 
-        case 'p':
+        case 'f':
         {
-            strncpy(args.path, optarg, sizeof(args.path));
+            strncpy(args.filename, optarg, sizeof(args.filename));
             break;
         }
 
@@ -65,7 +65,7 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
         return SDL_APP_FAILURE;
     }
 
-    if (!(surface = IMG_Load(args.path)))
+    if (!(surface = IMG_Load(args.filename)))
     {
         SDL_Log("Couldn't load image: %s", SDL_GetError());
         return SDL_APP_FAILURE;

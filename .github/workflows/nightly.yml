@@ -6,13 +6,13 @@ on:
 
 jobs:
   windows:
-    uses: cmake-donizete/actions/.github/workflows/windows-workflow.yaml@main
+    uses: ci-cd-donizete/github-actions/.github/workflows/windows-workflow.yaml@main
     secrets: inherit
     with:
-      name: translucent
+      name: translucent-sdl3
 
   linux:
-    uses: cmake-donizete/actions/.github/workflows/linux-workflow.yaml@main
+    uses: ci-cd-donizete/github-actions/.github/workflows/linux-workflow.yaml@main
     secrets: inherit
     with:
-      name: translucent
+      name: translucent-sdl3

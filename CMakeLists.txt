@@ -3,8 +3,8 @@ project(translucent VERSION 0.1.0 LANGUAGES C)
 
 add_subdirectory(external)
 
-add_executable(translucent main.c)
+add_executable(translucent-sdl3 main.c)
 
-target_include_directories(translucent PUBLIC include/)
+target_include_directories(translucent-sdl3 PUBLIC include/)
 
-target_link_libraries(translucent SDL3_image::SDL3_image SDL3::SDL3)
+target_link_libraries(translucent-sdl3 SDL3_image::SDL3_image SDL3::SDL3)
