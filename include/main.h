@@ -19,8 +19,11 @@ struct state
     SDL_FRect texture_rect;
 
     bool is_dragging;
-    float scale;
+    float window_scale;
+    float image_scale;
     float opacity;
+    uint8_t is_scaling;
+    uint16_t tmp_scale;
 };
 
 static struct args args = {
@@ -29,6 +32,9 @@ static struct args args = {
 };
 
 static struct state state = {
-    .scale = 1.0f,
-    .opacity = .5f
+    .window_scale = 1.0f,
+    .image_scale = 1.0f,
+    .opacity = .5f,
+    .is_scaling = SDL_SCANCODE_UNKNOWN,
+    .tmp_scale = 0,
 };

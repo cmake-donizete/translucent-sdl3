@@ -101,7 +101,7 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event)
 {
     SDL_Window *window = state.window;
     SDL_Texture *texture = state.texture;
-    SDL_FRect *f_rect = &state.texture_rect;
+    SDL_FRect *texture_rect = &state.texture_rect;
 
     if (event->type == SDL_EVENT_QUIT)
     {
@@ -113,13 +113,16 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event)
         SDL_Scancode scancode = event->key.scancode;
         if (scancode >= SDL_SCANCODE_1 && scancode <= SDL_SCANCODE_0)
         {
-
+            uint8_t number = ((scancode + 1) - SDL_SCANCODE_1) % 10;
+            state.tmp_scale *= 10;
+            state.tmp_scale += number;
         }
 
         if (scancode == SDL_SCANCODE_R)
         {
-            state.scale = 1.0f;
-            state.opacity = 1.0f;
+            state.window_scale = 1.0f;
+            state.image_scale = 1.0f;
+            state.opacity = .5f;
             state.texture_rect = (SDL_FRect){
                 .x = 0,
                 .y = 0,
@@ -131,6 +134,39 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event)
             SDL_SetWindowSize(window,
                               texture->w * args.window_scale,
                               texture->h * args.window_scale);
+        }
+
+        if (!state.is_scaling) {
+            if (scancode == SDL_SCANCODE_W) {
+                state.is_scaling = SDL_SCANCODE_W;
+            } else if (scancode == SDL_SCANCODE_I) {
+                state.is_scaling = SDL_SCANCODE_I;
+            }
+        } else {
+            if (scancode == SDL_SCANCODE_RETURN) {
+                if (state.is_scaling == SDL_SCANCODE_W) {
+                    state.window_scale = state.tmp_scale / 100.0f;
+                }
+                if (state.is_scaling == SDL_SCANCODE_I) {
+                    state.image_scale = state.tmp_scale / 100.0f;
+                }
+
+                SDL_SetWindowSize(
+                    window,
+                    texture->w * state.window_scale,
+                    texture->h * state.window_scale);
+
+                state.texture_rect.w = texture->w * state.image_scale;
+                state.texture_rect.h = texture->h * state.image_scale;
+
+                state.tmp_scale = 0;
+                state.is_scaling = SDL_SCANCODE_UNKNOWN;
+            }
+            if (scancode == SDL_SCANCODE_ESCAPE) {
+                state.tmp_scale = 0;
+                state.is_scaling = SDL_SCANCODE_UNKNOWN;
+                return SDL_APP_CONTINUE;
+            }
         }
 
         if (scancode == SDL_SCANCODE_ESCAPE)
@@ -153,8 +189,8 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event)
 
     if (event->type == SDL_EVENT_MOUSE_MOTION && state.is_dragging)
     {
-        f_rect->x += event->motion.xrel;
-        f_rect->y += event->motion.yrel;
+        texture_rect->x += event->motion.xrel;
+        texture_rect->y += event->motion.yrel;
     }
 
     if (event->type == SDL_EVENT_MOUSE_BUTTON_UP)
