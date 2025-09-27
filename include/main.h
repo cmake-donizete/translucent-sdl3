@@ -16,9 +16,7 @@ struct state
     SDL_Window *window;
     SDL_Renderer *renderer;
     SDL_Texture *texture;
-
-    SDL_FRect f_rect;
-    SDL_Point mouse_movement;
+    SDL_FRect texture_rect;
 
     bool is_dragging;
     float scale;

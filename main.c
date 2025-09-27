@@ -91,8 +91,8 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
     SDL_DestroySurface(surface);
 
     SDL_SetWindowOpacity(state.window, state.opacity);
-    state.f_rect.w = state.texture->w * args.image_scale;
-    state.f_rect.h = state.texture->h * args.image_scale;
+    state.texture_rect.w = state.texture->w * args.image_scale;
+    state.texture_rect.h = state.texture->h * args.image_scale;
 
     return SDL_APP_CONTINUE;
 }
@@ -101,8 +101,7 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event)
 {
     SDL_Window *window = state.window;
     SDL_Texture *texture = state.texture;
-    SDL_Point *mouse_movement = &state.mouse_movement;
-    SDL_FRect *f_rect = &state.f_rect;
+    SDL_FRect *f_rect = &state.texture_rect;
 
     if (event->type == SDL_EVENT_QUIT)
     {
@@ -121,7 +120,7 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event)
         {
             state.scale = 1.0f;
             state.opacity = 1.0f;
-            state.f_rect = (SDL_FRect){
+            state.texture_rect = (SDL_FRect){
                 .x = 0,
                 .y = 0,
                 .w = texture->w * args.image_scale,
@@ -149,22 +148,13 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event)
 
     if (event->type == SDL_EVENT_MOUSE_BUTTON_DOWN && !state.is_dragging)
     {
-        mouse_movement->x = event->motion.x;
-        mouse_movement->y = event->motion.y;
-
         state.is_dragging = true;
     }
 
-    if (event->type == SDL_EVENT_MOUSE_MOTION)
+    if (event->type == SDL_EVENT_MOUSE_MOTION && state.is_dragging)
     {
-        if (state.is_dragging)
-        {
-            f_rect->x += event->motion.x - mouse_movement->x;
-            f_rect->y += event->motion.y - mouse_movement->y;
-        }
-
-        mouse_movement->x = event->motion.x;
-        mouse_movement->y = event->motion.y;
+        f_rect->x += event->motion.xrel;
+        f_rect->y += event->motion.yrel;
     }
 
     if (event->type == SDL_EVENT_MOUSE_BUTTON_UP)
@@ -178,7 +168,7 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event)
 SDL_AppResult SDL_AppIterate(void *appstate)
 {
     SDL_RenderClear(state.renderer);
-    SDL_RenderTexture(state.renderer, state.texture, NULL, &state.f_rect);
+    SDL_RenderTexture(state.renderer, state.texture, NULL, &state.texture_rect);
     SDL_RenderPresent(state.renderer);
 
     return SDL_APP_CONTINUE;
