@@ -1,9 +1,9 @@
 {
     "cmake.debugConfig": {
         "args": [
-            "--image_scale=.5",
-            "--window_scale=.5",
-            "--filename=sample.jpeg"
+            "--image_scale=1",
+            "--window_scale=1",
+            "--filename=sample.png"
         ]
     }
 }

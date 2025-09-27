@@ -22,6 +22,7 @@ struct state
 
     bool is_dragging;
     float scale;
+    float opacity;
 };
 
 static struct args args = {
@@ -30,5 +31,6 @@ static struct args args = {
 };
 
 static struct state state = {
-    .scale = 1.0f
+    .scale = 1.0f,
+    .opacity = .5f
 };
