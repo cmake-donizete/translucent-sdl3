@@ -3,6 +3,7 @@
 #include <getopt.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 
 static void parse_args(int argc, char *argv[])
 {
@@ -90,9 +91,22 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[])
     }
     SDL_DestroySurface(surface);
 
-    SDL_SetWindowOpacity(state.window, state.opacity);
-    state.texture_rect.w = state.texture->w * args.image_scale;
-    state.texture_rect.h = state.texture->h * args.image_scale;
+    state.window_scale = args.window_scale;
+    state.image_scale = args.image_scale;
+
+    state.rect_dest.w = state.texture->w;
+    state.rect_dest.h = state.texture->h;
+
+    SDL_SetWindowOpacity(
+        state.window,
+        state.opacity);
+    SDL_SetRenderScale(
+        state.renderer,
+        state.image_scale,
+        state.image_scale);
+    SDL_SetTextureScaleMode(
+        state.texture,
+        SDL_SCALEMODE_NEAREST);
 
     return SDL_APP_CONTINUE;
 }
@@ -101,7 +115,7 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event)
 {
     SDL_Window *window = state.window;
     SDL_Texture *texture = state.texture;
-    SDL_FRect *texture_rect = &state.texture_rect;
+    SDL_FRect *rect_dest = &state.rect_dest;
 
     if (event->type == SDL_EVENT_QUIT)
     {
@@ -120,34 +134,63 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event)
 
         if (scancode == SDL_SCANCODE_R)
         {
-            state.window_scale = 1.0f;
-            state.image_scale = 1.0f;
-            state.opacity = .5f;
-            state.texture_rect = (SDL_FRect){
-                .x = 0,
-                .y = 0,
-                .w = texture->w * args.image_scale,
-                .h = texture->h * args.image_scale,
-            };
+            state.window_scale = args.window_scale;
+            state.image_scale = args.image_scale;
+            state.opacity = args.opacity;
+            state.rect_dest.x = 0;
+            state.rect_dest.y = 0;
 
-            SDL_SetWindowOpacity(window, state.opacity);
-            SDL_SetWindowSize(window,
-                              texture->w * args.window_scale,
-                              texture->h * args.window_scale);
+            SDL_SetWindowOpacity(
+                window,
+                state.opacity);
+            SDL_SetRenderScale(
+                state.renderer,
+                state.image_scale,
+                state.image_scale);
+            SDL_SetWindowSize(
+                window,
+                texture->w * args.window_scale,
+                texture->h * args.window_scale);
         }
 
-        if (!state.is_scaling) {
-            if (scancode == SDL_SCANCODE_W) {
+        switch (scancode)
+        {
+        case SDL_SCANCODE_RIGHT:
+            rect_dest->x += 1;
+            break;
+        case SDL_SCANCODE_LEFT:
+            rect_dest->x += -1;
+            break;
+        case SDL_SCANCODE_DOWN:
+            rect_dest->y += 1;
+            break;
+        case SDL_SCANCODE_UP:
+            rect_dest->y -= 1;
+            break;
+        }
+
+        if (!state.is_scaling)
+        {
+            if (scancode == SDL_SCANCODE_W)
+            {
                 state.is_scaling = SDL_SCANCODE_W;
-            } else if (scancode == SDL_SCANCODE_I) {
+            }
+            else if (scancode == SDL_SCANCODE_I)
+            {
                 state.is_scaling = SDL_SCANCODE_I;
             }
-        } else {
-            if (scancode == SDL_SCANCODE_RETURN) {
-                if (state.is_scaling == SDL_SCANCODE_W) {
+            state.tmp_scale = 0;
+        }
+        else
+        {
+            if (scancode == SDL_SCANCODE_RETURN)
+            {
+                if (state.is_scaling == SDL_SCANCODE_W)
+                {
                     state.window_scale = state.tmp_scale / 100.0f;
                 }
-                if (state.is_scaling == SDL_SCANCODE_I) {
+                if (state.is_scaling == SDL_SCANCODE_I)
+                {
                     state.image_scale = state.tmp_scale / 100.0f;
                 }
 
@@ -155,14 +198,16 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event)
                     window,
                     texture->w * state.window_scale,
                     texture->h * state.window_scale);
-
-                state.texture_rect.w = texture->w * state.image_scale;
-                state.texture_rect.h = texture->h * state.image_scale;
+                SDL_SetRenderScale(
+                    state.renderer,
+                    state.image_scale,
+                    state.image_scale);
 
                 state.tmp_scale = 0;
                 state.is_scaling = SDL_SCANCODE_UNKNOWN;
             }
-            if (scancode == SDL_SCANCODE_ESCAPE) {
+            if (scancode == SDL_SCANCODE_ESCAPE)
+            {
                 state.tmp_scale = 0;
                 state.is_scaling = SDL_SCANCODE_UNKNOWN;
                 return SDL_APP_CONTINUE;
@@ -189,13 +234,19 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event)
 
     if (event->type == SDL_EVENT_MOUSE_MOTION && state.is_dragging)
     {
-        texture_rect->x += event->motion.xrel;
-        texture_rect->y += event->motion.yrel;
+        // since our renderer is scaled we need to fix the event before usage
+        SDL_ConvertEventToRenderCoordinates(state.renderer, event);
+        rect_dest->x += event->motion.xrel;
+        rect_dest->y += event->motion.yrel;
     }
 
     if (event->type == SDL_EVENT_MOUSE_BUTTON_UP)
     {
         state.is_dragging = false;
+
+        // round our drag and drop to be pixel perfect
+        rect_dest->x = round(rect_dest->x);
+        rect_dest->y = round(rect_dest->y);
     }
 
     return SDL_APP_CONTINUE;
@@ -204,7 +255,7 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event)
 SDL_AppResult SDL_AppIterate(void *appstate)
 {
     SDL_RenderClear(state.renderer);
-    SDL_RenderTexture(state.renderer, state.texture, NULL, &state.texture_rect);
+    SDL_RenderTexture(state.renderer, state.texture, NULL, &state.rect_dest);
     SDL_RenderPresent(state.renderer);
 
     return SDL_APP_CONTINUE;
